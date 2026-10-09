@@ -11,6 +11,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
     steps:
       - uses: actions/checkout@v4
 
@@ -37,7 +40,7 @@ jobs:
           grep -n "screenOrientation\|CAMERA\|VIBRATE" $M
 
       - name: Generate app icon and splash screen
-        run: npx capacitor-assets generate --android --assetPath assets --iconBackgroundColor '#D6F2AB' --iconBackgroundColorDark '#D6F2AB' --splashBackgroundColor '#D6F2AB' --splashBackgroundColorDark '#D6F2AB'
+        run: npx capacitor-assets generate --android --assetPath assets --iconBackgroundColor '#22B35E' --iconBackgroundColorDark '#22B35E' --splashBackgroundColor '#22B35E' --splashBackgroundColorDark '#22B35E'
 
       - name: Remove system splash logo (only the animated start screen stays)
         run: |
@@ -49,25 +52,25 @@ jobs:
               <size android:width="1dp" android:height="1dp" />
           </shape>
           EOF
-          sed -i 's|<item name="android:background">@drawable/splash</item>|<item name="android:background">@drawable/splash</item>\n        <item name="windowSplashScreenBackground">#D6F2AB</item>\n        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon_empty</item>|' $R/values/styles.xml
+          sed -i 's|<item name="android:background">@drawable/splash</item>|<item name="android:background">@drawable/splash</item>\n        <item name="windowSplashScreenBackground">#22B35E</item>\n        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon_empty</item>|' $R/values/styles.xml
           cat $R/values/styles.xml
 
       - name: Copy web app into Android project
         run: npx cap sync android
 
       - name: Build debug APK
-        working-directory: android
+        working-directory: app/android
         run: ./gradlew assembleDebug
 
       - name: Save APK as workflow artifact
         uses: actions/upload-artifact@v4
         with:
           name: fit-tracker-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: app/android/app/build/outputs/apk/debug/app-debug.apk
 
       - name: Publish APK as GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: build-${{ github.run_number }}
           name: Fit Tracker, сборка ${{ github.run_number }}
-          files: android/app/build/outputs/apk/debug/app-debug.apk
+          files: app/android/app/build/outputs/apk/debug/app-debug.apk
