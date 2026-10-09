@@ -29,9 +29,15 @@ jobs:
       - name: Create Android project
         run: npx cap add android
 
-      - name: Allow camera for photo capture
+      - name: Configure Android manifest (camera, vibration, portrait only)
         run: |
-          sed -i 's#<application#<uses-permission android:name="android.permission.CAMERA" />\n    <application#' android/app/src/main/AndroidManifest.xml
+          M=android/app/src/main/AndroidManifest.xml
+          sed -i 's#<application#<uses-permission android:name="android.permission.CAMERA" />\n    <uses-permission android:name="android.permission.VIBRATE" />\n    <application#' $M
+          sed -i 's#<activity#<activity android:screenOrientation="portrait"#' $M
+          grep -n "screenOrientation\|CAMERA\|VIBRATE" $M
+
+      - name: Generate app icon and splash screen
+        run: npx capacitor-assets generate --android --assetPath assets --iconBackgroundColor '#A2BA7E' --iconBackgroundColorDark '#A2BA7E' --splashBackgroundColor '#A2BA7E' --splashBackgroundColorDark '#A2BA7E'
 
       - name: Copy web app into Android project
         run: npx cap sync android
