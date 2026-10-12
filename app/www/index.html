@@ -1724,6 +1724,37 @@ document.addEventListener('visibilitychange',function(){syncNotify();if(!documen
     if(App.exitApp)App.exitApp();
   });
 })();
+
+/* ---------- проверка обновлений (только в APK, нужен интернет) ---------- */
+var FT_BUILD=0;var FT_REPO='';
+(function(){
+  var K='fit-update-v1',url='';
+  function rd(){try{return JSON.parse(localStorage.getItem(K))||{}}catch(e){return {}}}
+  function wr(o){try{localStorage.setItem(K,JSON.stringify(o))}catch(e){}}
+  function check(force){
+    if(!NATIVE||!(FT_BUILD>0)||!FT_REPO||navigator.onLine===false||typeof fetch!=='function')return;
+    var st=rd(),now=Date.now();
+    if(!force&&st.at&&now-st.at<6*3600*1000)return;
+    wr({at:now,skip:st.skip});
+    var ctl=window.AbortController?new AbortController():null;var to=setTimeout(function(){if(ctl)ctl.abort()},8000);
+    fetch('https://api.github.com/repos/'+FT_REPO+'/releases/latest',{headers:{Accept:'application/vnd.github+json'},signal:ctl?ctl.signal:undefined})
+      .then(function(r){return r.ok?r.json():null}).then(function(j){
+        clearTimeout(to);if(!j||!j.tag_name)return;
+        var m=/(\d+)\s*$/.exec(j.tag_name),n=m?+m[1]:0;if(!(n>FT_BUILD))return;
+        if(rd().skip===n)return;
+        var a=(j.assets||[]).filter(function(x){return /\.apk$/i.test(x.name||'')})[0];
+        url=a?a.browser_download_url:j.html_url;if(!url)return;
+        if(S.session&&S.session.active)return;
+        if($('#layer').firstChild)return;
+        sheet('<h3>Доступно обновление</h3><div class="sub" style="margin-bottom:14px">Вышла новая версия приложения (сборка '+n+'). Ваши данные сохранятся. После скачивания откройте файл и подтвердите установку.</div><div class="col" style="gap:8px"><button class="btn" data-act="updgo">Скачать обновление</button><button class="btn o" data-act="updlater" data-n="'+n+'">Позже</button></div>');
+      }).catch(function(){clearTimeout(to)});
+  }
+  A.updgo=function(){closeSheet();render(true);try{window.open(url,'_blank')}catch(e){location.href=url}};
+  A.updlater=function(el){var n=+(el&&el.dataset&&el.dataset.n)||0;var st=rd();st.skip=n;wr(st);closeSheet();render(true)};
+  setTimeout(function(){check(false)},4000);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)setTimeout(function(){check(false)},1500)});
+  window.addEventListener('online',function(){setTimeout(function(){check(false)},1500)});
+})();
 })();
 </script>
 </body>

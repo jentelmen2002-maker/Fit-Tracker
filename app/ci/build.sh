@@ -30,6 +30,13 @@ cat > "$R/drawable/splash_icon_empty.xml" <<'XML'
 XML
 sed -i "s|<item name=\"android:background\">@drawable/splash</item>|<item name=\"android:background\">@drawable/splash</item>\n        <item name=\"windowSplashScreenBackground\">$BG</item>\n        <item name=\"windowSplashScreenAnimatedIcon\">@drawable/splash_icon_empty</item>|" "$R/values/styles.xml"
 
+# --- номер сборки и репозиторий для проверки обновлений ---
+sed -i "s|var FT_BUILD=0;|var FT_BUILD=${GITHUB_RUN_NUMBER:-0};|; s|var FT_REPO='';|var FT_REPO='${GITHUB_REPOSITORY:-}';|" www/index.html
+
+# --- постоянный ключ подписи: без него обновление поверх установленного приложения не встанет ---
+mkdir -p "$HOME/.android"
+cp ci/debug.keystore "$HOME/.android/debug.keystore"
+
 npx cap sync android
 
 if [ "${SKIP_GRADLE:-}" != "1" ]; then
