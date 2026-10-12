@@ -10,7 +10,8 @@ npx cap add android
 M=android/app/src/main/AndroidManifest.xml
 sed -i 's#<application#<uses-permission android:name="android.permission.CAMERA" />\n    <uses-permission android:name="android.permission.VIBRATE" />\n    <application#' "$M"
 sed -i 's#<activity#<activity android:screenOrientation="portrait"#' "$M"
-grep -n "screenOrientation\|CAMERA\|VIBRATE" "$M"
+sed -i 's#<application#<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\n    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />\n    <application#' "$M"
+grep -n "screenOrientation\|CAMERA\|VIBRATE\|NOTIFICATIONS\|EXACT_ALARM" "$M"
 
 # Иконка и заставка из папки assets
 BG='#0C5026'
