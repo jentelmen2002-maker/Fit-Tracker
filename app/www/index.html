@@ -155,6 +155,7 @@ textarea.inp{min-height:84px;resize:vertical;font-weight:500}
 .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
 .chip{flex:none;height:38px;padding:0 18px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-weight:600;color:var(--muted)}
+.chips.goals{display:grid;grid-template-columns:1fr 1fr;gap:8px;overflow:visible}.chips.goals .chip{height:44px;padding:0 10px;text-align:center;white-space:nowrap;font-size:15px}.chips.goals .chip:nth-child(2){grid-column:1/-1;order:3}
 .chip.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 
 .exrow{display:flex;align-items:center;gap:12px;padding:10px 8px 10px 10px;background:var(--surface);border:1px solid var(--line);border-radius:16px;touch-action:pan-y}
@@ -260,6 +261,7 @@ img[data-pid]:not([src]){visibility:hidden}
 .cfgrow .r{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;min-width:0}
 .mini{display:flex;align-items:center;background:var(--surface2);border:1px solid var(--line);border-radius:12px}
 .mini button{width:34px;height:34px;display:grid;place-items:center;color:var(--muted);flex:none;text-align:center}
+.fld input::placeholder{color:var(--muted);opacity:.6;font-weight:500}
 .mini input::placeholder{color:var(--muted);opacity:.55;font-weight:600}
 .mini input{width:60px;min-width:0;border:0;background:none;text-align:center;font-weight:700;outline:none}
 .useg{display:flex;background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:2px;flex:none}
@@ -436,7 +438,8 @@ var CATALOG=[
 ['Планка','Пресс','core',3,'45 сек',45,90]
 ];
 var GROUPS=['Грудь','Спина','Плечи','Руки','Ноги','Пресс','Кардио'];
-var GOALS=['Набор массы','Снижение веса','Поддержание формы','Сила'];
+var GOALS=['Снижение веса','Поддержание формы','Сила'];
+var GOAL_OLD={'Набор массы':'Сила','Набор мышечной массы':'Сила','Набор мышц':'Сила','Нарастить мышцы':'Сила','Выносливость':'Сила','Рост силы':'Сила','Стать сильнее':'Сила','Похудеть':'Снижение веса','Поддерживать форму':'Поддержание формы'};
 function exFrom(c){return {id:uid(),name:c[0],muscle:c[1],kind:c[2],sets:c[3],reps:c[4],rest:c[5],restUnit:'сек'}}
 function exByName(n){var c=CATALOG.filter(function(x){return x[0]===n})[0];return exFrom(c)}
 
@@ -459,6 +462,7 @@ if(S.onboarded===undefined)S.onboarded=true;if(!S.presets)S.presets={};if(!S.cus
   if(typeof S.xp!=='number'||!isFinite(S.xp))S.xp=0;
   if(!S.photos||typeof S.photos!=='object')S.photos=b.photos;if(!S.photos.m||typeof S.photos.m!=='object')S.photos.m=b.photos.m;
   if(typeof S.name!=='string')S.name=b.name;
+  if(GOAL_OLD[S.goal])S.goal=GOAL_OLD[S.goal];
 })();
 (function(){
   function mv(P){['before','after'].forEach(function(k){var q=P&&P[k];if(q&&q.src){var id=uid();putPhoto(id,q.src);P[k]={id:id,date:q.date}}})}
@@ -953,8 +957,8 @@ screens.onboard=function(){
   var o=U.ob||(U.ob={name:'',height:'',weight:'',age:'',goal:''});
   var inp=function(id,label,key,suf,mode,ph){return '<div class="lbl">'+label+'</div><div class="fld"><input id="'+id+'" data-bind="ob:'+key+'" value="'+esc(o[key])+'" inputmode="'+mode+'" placeholder="'+ph+'" aria-label="'+label+'"'+(key==='name'?' maxlength="24"':'')+'><span class="suf">'+suf+'</span></div>'};
   return '<div class="col" style="padding-top:28px"><div><div style="color:var(--accent-text);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase">Fit Tracker</div><h1 style="font-size:28px;font-weight:800;letter-spacing:-.02em;margin:6px 0;text-wrap:balance">Давайте знакомиться</h1><div class="sub">Эти данные нужны для статистики. Можно пропустить и заполнить позже в профиле.</div></div>'+
-    '<div>'+inp('ob-name','Как вас зовут','name','','text','Например: Егор')+inp('ob-height','Рост','height','см','decimal','175')+inp('ob-weight','Вес','weight','кг','decimal','70')+inp('ob-age','Возраст','age','','numeric','25')+
-    '<div class="lbl">Цель</div><div class="chips" style="flex-wrap:wrap">'+GOALS.map(function(g){return '<button class="chip'+(o.goal===g?' on':'')+'" data-act="obgoal" data-v="'+g+'">'+g+'</button>'}).join('')+'</div></div>'+
+    '<div>'+inp('ob-name','Имя','name','','text','Иван')+inp('ob-height','Рост','height','см','decimal','175')+inp('ob-weight','Вес','weight','кг','decimal','70')+inp('ob-age','Возраст','age','','numeric','25')+
+    '<div class="lbl">Цель</div><div class="chips goals">'+GOALS.map(function(g){return '<button class="chip'+(o.goal===g?' on':'')+'" data-act="obgoal" data-v="'+g+'">'+g+'</button>'}).join('')+'</div></div>'+
     '<div class="col" style="margin-top:6px"><button class="btn" data-act="obsave">Продолжить</button><button class="btn o" data-act="obskip">Пропустить</button></div></div>';
 };
 screens.profile=function(){
