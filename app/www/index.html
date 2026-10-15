@@ -1735,24 +1735,34 @@ var FT_BUILD=0;var FT_REPO='';
   var K='fit-update-v1',url='';
   function rd(){try{return JSON.parse(localStorage.getItem(K))||{}}catch(e){return {}}}
   function wr(o){try{localStorage.setItem(K,JSON.stringify(o))}catch(e){}}
-  function check(force){
-    if(!NATIVE||!(FT_BUILD>0)||!FT_REPO||navigator.onLine===false||typeof fetch!=='function')return;
+  function msg(m,manual){if(manual)toast(m)}
+  function check(manual){
+    if(!NATIVE){msg('Проверка работает только в установленном приложении',manual);return}
+    if(!(FT_BUILD>0)||!FT_REPO){msg('Эта сборка без номера: обновления не проверяются',manual);return}
+    if(navigator.onLine===false||typeof fetch!=='function'){msg('Нет интернета',manual);return}
     var st=rd(),now=Date.now();
-    if(!force&&st.at&&now-st.at<6*3600*1000)return;
-    wr({at:now,skip:st.skip});
+    if(!manual&&st.at&&now-st.at<6*3600*1000)return;
     var ctl=window.AbortController?new AbortController():null;var to=setTimeout(function(){if(ctl)ctl.abort()},8000);
+    if(manual)toast('Проверяю…');
     fetch('https://api.github.com/repos/'+FT_REPO+'/releases/latest',{headers:{Accept:'application/vnd.github+json'},signal:ctl?ctl.signal:undefined})
-      .then(function(r){return r.ok?r.json():null}).then(function(j){
-        clearTimeout(to);if(!j||!j.tag_name)return;
-        var m=/(\d+)\s*$/.exec(j.tag_name),n=m?+m[1]:0;if(!(n>FT_BUILD))return;
-        if(rd().skip===n)return;
+      .then(function(r){
+        clearTimeout(to);
+        if(!r.ok){msg(r.status===404?'Релизы не найдены: репозиторий приватный или релиза ещё нет':'GitHub ответил ошибкой '+r.status,manual);return null}
+        return r.json();
+      }).then(function(j){
+        if(!j)return;
+        var cur=rd();cur.at=Date.now();wr(cur);
+        if(!j.tag_name){msg('Не удалось прочитать версию релиза',manual);return}
+        var m=/(\d+)\s*$/.exec(j.tag_name),n=m?+m[1]:0;
+        if(!(n>FT_BUILD)){msg('Установлена последняя версия (сборка '+FT_BUILD+')',manual);return}
+        if(!manual&&cur.skip===n)return;
         var a=(j.assets||[]).filter(function(x){return /\.apk$/i.test(x.name||'')})[0];
-        url=a?a.browser_download_url:j.html_url;if(!url)return;
-        if(S.session&&S.session.active)return;
-        if($('#layer').firstChild)return;
-        sheet('<h3>Доступно обновление</h3><div class="sub" style="margin-bottom:14px">Вышла новая версия приложения (сборка '+n+'). Ваши данные сохранятся. После скачивания откройте файл и подтвердите установку.</div><div class="col" style="gap:8px"><button class="btn" data-act="updgo">Скачать обновление</button><button class="btn o" data-act="updlater" data-n="'+n+'">Позже</button></div>');
-      }).catch(function(){clearTimeout(to)});
+        url=a?a.browser_download_url:(j.html_url||'https://github.com/'+FT_REPO+'/releases/latest');
+        if(!manual){if(S.session&&S.session.active)return;if($('#layer').firstChild)return}
+        sheet('<h3>Доступно обновление</h3><div class="sub" style="margin-bottom:14px">Вышла новая версия приложения (сборка '+n+', у вас '+FT_BUILD+'). Ваши данные сохранятся. После скачивания откройте файл и подтвердите установку.</div><div class="col" style="gap:8px"><button class="btn" data-act="updgo">Скачать обновление</button><button class="btn o" data-act="updlater" data-n="'+n+'">Позже</button></div>');
+      }).catch(function(){clearTimeout(to);msg('Не удалось связаться с GitHub. Проверьте интернет',manual)});
   }
+  A.updcheck=function(){closeSheet();check(true)};
   A.updgo=function(){closeSheet();render(true);try{window.open(url,'_blank')}catch(e){location.href=url}};
   A.updlater=function(el){var n=+(el&&el.dataset&&el.dataset.n)||0;var st=rd();st.skip=n;wr(st);closeSheet();render(true)};
   setTimeout(function(){check(false)},4000);
