@@ -1219,7 +1219,8 @@ var A={
     sheet('<h3>Настройки</h3><div class="lbl" style="margin-top:0">Имя</div><input class="inp" id="nameSet" data-bind="name" value="'+esc(S.name)+'" maxlength="24">'+
       '<div class="lbl">Тема</div><div class="seg" id="themeSeg">'+[['auto','Авто'],['light','Светлая'],['dark','Тёмная']].map(function(x){return '<button class="'+(S.theme===x[0]?'on':'')+'" data-act="theme" data-v="'+x[0]+'">'+x[1]+'</button>'}).join('')+'</div>'+
       '<button class="card row" style="width:100%;margin-top:14px;box-shadow:none" data-act="sound" role="switch" aria-checked="'+S.sound+'"><span class="grow" style="font-weight:600">Звук таймера</span><span class="sw'+(S.sound?' on':'')+'" id="soundSw"></span></button>'+
-      '<div style="margin-top:14px"><button class="btn" data-act="savesettings">Сохранить</button></div>');
+      '<div style="margin-top:14px"><button class="btn" data-act="savesettings">Сохранить</button></div>'+
+      '<div style="margin-top:12px;text-align:center;color:var(--muted);font-size:12px">'+(typeof FT_BUILD==='number'&&FT_BUILD>0?'Сборка '+FT_BUILD:'Версия без номера (веб или ручная сборка)')+'</div>');
   },
   theme:function(t){S.theme=t.dataset.v;applyTheme();save();var s=$('#themeSeg');[].forEach.call(s.children,function(b){b.classList.toggle('on',b.dataset.v===S.theme)})},
   sound:function(){S.sound=!S.sound;save();$('#soundSw').classList.toggle('on',S.sound)},
