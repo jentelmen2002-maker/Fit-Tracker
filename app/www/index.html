@@ -1736,12 +1736,12 @@ var FT_BUILD=0;var FT_REPO='';
   function rd(){try{return JSON.parse(localStorage.getItem(K))||{}}catch(e){return {}}}
   function wr(o){try{localStorage.setItem(K,JSON.stringify(o))}catch(e){}}
   function msg(m,manual){if(manual)toast(m)}
-  function check(manual){
+  function check(manual,force){
     if(!NATIVE){msg('Проверка работает только в установленном приложении',manual);return}
     if(!(FT_BUILD>0)||!FT_REPO){msg('Эта сборка без номера: обновления не проверяются',manual);return}
     if(navigator.onLine===false||typeof fetch!=='function'){msg('Нет интернета',manual);return}
     var st=rd(),now=Date.now();
-    if(!manual&&st.at&&now-st.at<6*3600*1000)return;
+    if(!manual&&!force&&st.at&&now-st.at<6*3600*1000)return;
     var ctl=window.AbortController?new AbortController():null;var to=setTimeout(function(){if(ctl)ctl.abort()},8000);
     if(manual)toast('Проверяю…');
     fetch('https://api.github.com/repos/'+FT_REPO+'/releases/latest',{headers:{Accept:'application/vnd.github+json'},signal:ctl?ctl.signal:undefined})
@@ -1765,7 +1765,7 @@ var FT_BUILD=0;var FT_REPO='';
   A.updcheck=function(){closeSheet();check(true)};
   A.updgo=function(){closeSheet();render(true);try{window.open(url,'_blank')}catch(e){location.href=url}};
   A.updlater=function(el){var n=+(el&&el.dataset&&el.dataset.n)||0;var st=rd();st.skip=n;wr(st);closeSheet();render(true)};
-  setTimeout(function(){check(false)},4000);
+  setTimeout(function(){check(false,true)},4000);
   document.addEventListener('visibilitychange',function(){if(!document.hidden)setTimeout(function(){check(false)},1500)});
   window.addEventListener('online',function(){setTimeout(function(){check(false)},1500)});
 })();
