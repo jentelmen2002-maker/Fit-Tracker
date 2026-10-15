@@ -1219,8 +1219,7 @@ var A={
     sheet('<h3>Настройки</h3><div class="lbl" style="margin-top:0">Имя</div><input class="inp" id="nameSet" data-bind="name" value="'+esc(S.name)+'" maxlength="24">'+
       '<div class="lbl">Тема</div><div class="seg" id="themeSeg">'+[['auto','Авто'],['light','Светлая'],['dark','Тёмная']].map(function(x){return '<button class="'+(S.theme===x[0]?'on':'')+'" data-act="theme" data-v="'+x[0]+'">'+x[1]+'</button>'}).join('')+'</div>'+
       '<button class="card row" style="width:100%;margin-top:14px;box-shadow:none" data-act="sound" role="switch" aria-checked="'+S.sound+'"><span class="grow" style="font-weight:600">Звук таймера</span><span class="sw'+(S.sound?' on':'')+'" id="soundSw"></span></button>'+
-      '<div style="margin-top:14px"><button class="btn" data-act="savesettings">Сохранить</button></div>'+
-      '<div style="margin-top:12px;text-align:center;color:var(--muted);font-size:12px">'+(typeof FT_BUILD==='number'&&FT_BUILD>0?'Сборка '+FT_BUILD:'Версия без номера (веб или ручная сборка)')+'</div>');
+      '<div style="margin-top:14px"><button class="btn" data-act="savesettings">Сохранить</button></div>');
   },
   theme:function(t){S.theme=t.dataset.v;applyTheme();save();var s=$('#themeSeg');[].forEach.call(s.children,function(b){b.classList.toggle('on',b.dataset.v===S.theme)})},
   sound:function(){S.sound=!S.sound;save();$('#soundSw').classList.toggle('on',S.sound)},
@@ -1760,7 +1759,7 @@ var FT_BUILD=0;var FT_REPO='';
         var a=(j.assets||[]).filter(function(x){return /\.apk$/i.test(x.name||'')})[0];
         url=a?a.browser_download_url:(j.html_url||'https://github.com/'+FT_REPO+'/releases/latest');
         if(!manual){if(S.session&&S.session.active)return;if($('#layer').firstChild)return}
-        sheet('<h3>Доступно обновление</h3><div class="sub" style="margin-bottom:14px">Вышла новая версия приложения (сборка '+n+', у вас '+FT_BUILD+'). Ваши данные сохранятся. После скачивания откройте файл и подтвердите установку.</div><div class="col" style="gap:8px"><button class="btn" data-act="updgo">Скачать обновление</button><button class="btn o" data-act="updlater" data-n="'+n+'">Позже</button></div>');
+        sheet('<h3>Доступно обновление</h3><div class="sub" style="margin-bottom:14px">Вышла новая версия приложения. Ваши данные сохранятся. После скачивания откройте файл и подтвердите установку.</div><div class="col" style="gap:8px"><button class="btn" data-act="updgo">Скачать обновление</button><button class="btn o" data-act="updlater" data-n="'+n+'">Позже</button></div>');
       }).catch(function(){clearTimeout(to);msg('Не удалось связаться с GitHub. Проверьте интернет',manual)});
   }
   A.updcheck=function(){closeSheet();check(true)};
