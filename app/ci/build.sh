@@ -19,6 +19,16 @@ npx capacitor-assets generate --android --assetPath assets \
   --iconBackgroundColor "$BG" --iconBackgroundColorDark "$BG" \
   --splashBackgroundColor "$BG" --splashBackgroundColorDark "$BG"
 
+# Обычная (не адаптивная) иконка: на Xiaomi/MIUI показывается как есть, во всю площадь, без обрезки слоёв
+R0=android/app/src/main/res
+rm -f "$R0"/mipmap-anydpi-v26/ic_launcher.xml "$R0"/mipmap-anydpi-v26/ic_launcher_round.xml
+rm -f "$R0"/mipmap-*/ic_launcher_foreground.png "$R0"/mipmap-*/ic_launcher_background.png
+for D in ci/icons/*/; do
+  N=$(basename "$D")
+  mkdir -p "$R0/$N"
+  cp "$D/ic_launcher.png" "$D/ic_launcher_round.png" "$R0/$N/"
+done
+
 # Системная заставка Android без логотипа: остаётся только анимированная
 R=android/app/src/main/res
 cat > "$R/drawable/splash_icon_empty.xml" <<'XML'
