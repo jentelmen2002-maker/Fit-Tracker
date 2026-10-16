@@ -44,6 +44,32 @@ BN="${GITHUB_RUN_NUMBER:-1}"
 sed -i "s/versionCode [0-9]*/versionCode $BN/; s/versionName \"[^\"]*\"/versionName \"1.0.$BN\"/" android/app/build.gradle
 grep -n "versionCode\|versionName" android/app/build.gradle || true
 
+# --- явно прописываем постоянный ключ подписи в gradle (путь относительно android/app) ---
+python3 - <<'PY'
+import re,sys
+p='android/app/build.gradle'
+t=open(p).read()
+if 'ci/debug.keystore' in t:
+    sys.exit(0)
+cfg="""    signingConfigs {
+        debug {
+            storeFile file('../../ci/debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+    }
+"""
+m=re.search(r'^android \{\n',t,re.M)
+if not m: sys.exit('build.gradle: блок android не найден')
+t=t[:m.end()]+cfg+t[m.end():]
+m2=re.search(r'^    buildTypes \{\n',t,re.M)
+if not m2: sys.exit('build.gradle: блок buildTypes не найден')
+t=t[:m2.end()]+"        debug {\n            signingConfig signingConfigs.debug\n        }\n"+t[m2.end():]
+open(p,'w').write(t)
+PY
+grep -n "debug.keystore\|signingConfig" android/app/build.gradle
+
 if [ "${SKIP_GRADLE:-}" != "1" ]; then
   (cd android && ./gradlew assembleDebug)
   # --- отпечаток подписи: у всех сборок он должен быть одинаковым ---
