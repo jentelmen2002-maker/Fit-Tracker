@@ -39,6 +39,14 @@ cp ci/debug.keystore "$HOME/.android/debug.keystore"
 
 npx cap sync android
 
+# --- версия приложения растёт с каждой сборкой ---
+BN="${GITHUB_RUN_NUMBER:-1}"
+sed -i "s/versionCode [0-9]*/versionCode $BN/; s/versionName \"[^\"]*\"/versionName \"1.0.$BN\"/" android/app/build.gradle
+grep -n "versionCode\|versionName" android/app/build.gradle || true
+
 if [ "${SKIP_GRADLE:-}" != "1" ]; then
   (cd android && ./gradlew assembleDebug)
+  # --- отпечаток подписи: у всех сборок он должен быть одинаковым ---
+  echo "Key file in repo:"; keytool -list -keystore ci/debug.keystore -storepass android 2>/dev/null | grep -i "SHA-256\|SHA256" || true
+  echo "APK signature:"; keytool -printcert -jarfile android/app/build/outputs/apk/debug/app-debug.apk | grep -i "SHA256\|Owner" || true
 fi
