@@ -1759,7 +1759,7 @@ var FT_BUILD=0;var FT_REPO='';
         var a=(j.assets||[]).filter(function(x){return /\.apk$/i.test(x.name||'')})[0];
         url=a?a.browser_download_url:(j.html_url||'https://github.com/'+FT_REPO+'/releases/latest');
         if(!manual){if(S.session&&S.session.active)return;if($('#layer').firstChild)return}
-        sheet('<h3>Доступно обновление</h3><div class="sub" style="margin-bottom:14px">Вышла новая версия приложения. Ваши данные сохранятся. После скачивания откройте файл и подтвердите установку.</div><div class="col" style="gap:8px"><button class="btn" data-act="updgo">Скачать обновление</button><button class="btn o" data-act="updlater" data-n="'+n+'">Позже</button></div>');
+        sheet('<h3>Доступно обновление</h3><div class="sub" style="margin-bottom:14px;text-align:justify;hyphens:auto;-webkit-hyphens:auto">Вышла новая версия приложения. Ваши данные сохранятся. После скачивания откройте файл и подтвердите установку.</div><div class="col" style="gap:8px"><button class="btn" data-act="updgo">Скачать обновление</button><button class="btn o" data-act="updlater" data-n="'+n+'">Позже</button></div>');
       }).catch(function(){clearTimeout(to);msg('Не удалось связаться с GitHub. Проверьте интернет',manual)});
   }
   A.updcheck=function(){closeSheet();check(true)};
